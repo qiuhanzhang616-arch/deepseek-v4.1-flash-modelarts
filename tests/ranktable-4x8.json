@@ -1,0 +1,22 @@
+{
+  "status": "completed",
+  "server_group_list": [
+    {
+      "group_id": "0",
+      "server_list": [
+        {"server_id": "head", "server_ip": "10.0.0.10", "device": [
+          {"device_id": "0"}, {"device_id": "1"}, {"device_id": "2"}, {"device_id": "3"},
+          {"device_id": "4"}, {"device_id": "5"}, {"device_id": "6"}, {"device_id": "7"}
+        ]}
+      ]
+    },
+    {
+      "group_id": "1",
+      "server_list": [
+        {"server_id": "worker-1", "server_ip": "10.0.0.11", "device": [{}, {}, {}, {}, {}, {}, {}, {}]},
+        {"server_id": "worker-2", "server_ip": "10.0.0.12", "device": [{}, {}, {}, {}, {}, {}, {}, {}]},
+        {"server_id": "worker-3", "server_ip": "10.0.0.13", "device": [{}, {}, {}, {}, {}, {}, {}, {}]}
+      ]
+    }
+  ]
+}

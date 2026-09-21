@@ -1,0 +1,129 @@
+{
+  "name": "${SERVICE_NAME}",
+  "version": "1.0.0",
+  "description": "DeepSeek-V4.1-Flash W8A8 on four 8-NPU Ascend A2 nodes, DP4/TP8/EP32, 1M context",
+  "type": "REAL_TIME",
+  "deploy_type": "MULTI",
+  "deploy_timeout_minutes": 120,
+  "workspace_id": "${WORKSPACE_ID}",
+  "tags": [],
+  "group_configs": [
+    {
+      "name": "${DEPLOYMENT_NAME}",
+      "weight": 100,
+      "pool_id": "${POOL_ID}",
+      "framework": "COMMON",
+      "count": 1,
+      "deploy_type": "MULTI",
+      "schedule_strategy": "HIGH_PERFORMANCE",
+      "system_log_dump_enable": false,
+      "unit_configs": [
+        {
+          "name": "role-0",
+          "role": "COMMON",
+          "flavor": "${A2_8_CARD_FLAVOR}",
+          "count": 1,
+          "image": {
+            "source": "SWR",
+            "swr_path": "${SWR_IMAGE_URI}",
+            "category": "ASCEND"
+          },
+          "files": [
+            {
+              "source": "EFS",
+              "source_id": "${SFS_TURBO_ID}",
+              "efs_sub_path": "${SFS_SUB_PATH}",
+              "mount_path": "/model/deepseek-v41-flash/",
+              "read_only": false,
+              "host_cache": false
+            }
+          ],
+          "cmd": "bash /model/deepseek-v41-flash/scripts/start.sh",
+          "envs": {
+            "MODEL_ROOT": "/model/deepseek-v41-flash",
+            "MODEL_NAME": "deepseek-v4.1-flash",
+            "SERVICE_PORT": "8000",
+            "DP_RPC_PORT": "13399",
+            "DP_MASTER_WAIT_SECONDS": "3600",
+            "EXPECTED_NODES": "4",
+            "DEVICES_PER_NODE": "8",
+            "MAX_MODEL_LEN": "1048576",
+            "MAX_NUM_SEQS": "32",
+            "MAX_NUM_BATCHED_TOKENS": "4096",
+            "GPU_MEMORY_UTILIZATION": "0.94",
+            "MODEL_LOADER_THREADS": "128",
+            "CANDIDATE_ID": "validated-a2-1m-m094",
+            "ENABLE_RUNTIME_TELEMETRY": "1",
+            "TELEMETRY_INTERVAL_SECONDS": "30"
+          },
+          "port": 8000,
+          "npu_reset_enable": false
+        },
+        {
+          "name": "role-1",
+          "role": "COMMON",
+          "flavor": "${A2_8_CARD_FLAVOR}",
+          "count": 3,
+          "image": {
+            "source": "SWR",
+            "swr_path": "${SWR_IMAGE_URI}",
+            "category": "ASCEND"
+          },
+          "files": [
+            {
+              "source": "EFS",
+              "source_id": "${SFS_TURBO_ID}",
+              "efs_sub_path": "${SFS_SUB_PATH}",
+              "mount_path": "/model/deepseek-v41-flash/",
+              "read_only": false,
+              "host_cache": false
+            }
+          ],
+          "cmd": "bash /model/deepseek-v41-flash/scripts/start.sh",
+          "envs": {
+            "MODEL_ROOT": "/model/deepseek-v41-flash",
+            "MODEL_NAME": "deepseek-v4.1-flash",
+            "SERVICE_PORT": "8000",
+            "DP_RPC_PORT": "13399",
+            "DP_MASTER_WAIT_SECONDS": "3600",
+            "EXPECTED_NODES": "4",
+            "DEVICES_PER_NODE": "8",
+            "MAX_MODEL_LEN": "1048576",
+            "MAX_NUM_SEQS": "32",
+            "MAX_NUM_BATCHED_TOKENS": "4096",
+            "GPU_MEMORY_UTILIZATION": "0.94",
+            "MODEL_LOADER_THREADS": "128",
+            "CANDIDATE_ID": "validated-a2-1m-m094",
+            "ENABLE_RUNTIME_TELEMETRY": "1",
+            "TELEMETRY_INTERVAL_SECONDS": "30"
+          },
+          "port": 8000,
+          "npu_reset_enable": false
+        }
+      ]
+    }
+  ],
+  "runtime_config": {
+    "service_invoke": {
+      "port": 8000,
+      "protocol": "HTTPS",
+      "auth_type": "API_KEY",
+      "dynamic_routing_enable": false,
+      "internet_access_enable": ${INTERNET_ACCESS_ENABLED},
+      "intranet_approval_enable": ${INTRANET_APPROVAL_ENABLED}
+    },
+    "service_limit": {
+      "request_size_limit": 50,
+      "request_timeout": 1200,
+      "ip_white_list": [],
+      "ip_black_list": [],
+      "rate_limit": {
+        "num": 10000,
+        "unit": "SECONDS"
+      }
+    }
+  },
+  "custom_metrics_path": "/metrics",
+  "lts_strategy": "DEFAULT"
+}
+

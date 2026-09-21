@@ -1,0 +1,30 @@
+{
+  "Version": "1.1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "swr:repo:download",
+        "sfsturbo:shares:getShare",
+        "sfsturbo:shares:showFsDir",
+        "modelarts:authorization:list",
+        "modelarts:image:get",
+        "modelarts:pool:get",
+        "modelarts:pool:list",
+        "modelarts:pool:update",
+        "modelarts:warmupTask:list",
+        "modelarts:workspace:get",
+        "vpc:vpcs:list",
+        "vpc:subnets:get",
+        "lts:groups:create",
+        "lts:groups:get",
+        "lts:groups:list",
+        "lts:topics:create",
+        "lts:topics:delete",
+        "lts:topics:get",
+        "lts:topics:list"
+      ]
+    }
+  ]
+}
+

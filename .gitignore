@@ -1,0 +1,7 @@
+config/deployment.env
+rendered/
+__pycache__/
+*.pyc
+*.log
+.venv/
+

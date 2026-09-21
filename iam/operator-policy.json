@@ -1,0 +1,30 @@
+{
+  "Version": "1.1",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "modelarts:service:create",
+        "modelarts:service:list",
+        "modelarts:service:get",
+        "modelarts:service:getVersion",
+        "modelarts:service:update",
+        "modelarts:service:deleteVersion",
+        "modelarts:workspace:get",
+        "modelarts:pool:list",
+        "modelarts:pool:get",
+        "modelarts:image:get",
+        "modelarts:apikey:list",
+        "modelarts:apikey:create",
+        "modelarts:apikey:bind",
+        "modelarts:apikey:unbind",
+        "modelarts:apikey:delete",
+        "swr:repo:listRepoTags",
+        "swr:repository:getTag",
+        "sfsturbo:shares:getShare",
+        "sfsturbo:shares:showFsDir"
+      ]
+    }
+  ]
+}
+
