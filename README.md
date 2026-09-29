@@ -1,5 +1,7 @@
 # DeepSeek-V4.1-Flash on Huawei Cloud ModelArts
 
+> 要部署 **W4A8、A2 单机 TP8/EP8 × 4 独立副本**，请使用 [W4A8 ModelArts Standard 逐步指南与脚本包](w4a8/README.md)。下文是另一套 W8A8 跨节点 DP4/TP8/EP32 方案，镜像、权重和启动方式不可混用。
+
 Production-oriented, reusable deployment package for serving the Ascend W8A8
 checkpoint of DeepSeek-V4.1-Flash on **Huawei Cloud public cloud ModelArts
 real-time inference (new version)**.
