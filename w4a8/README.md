@@ -28,7 +28,8 @@
 ```bash
 git clone https://github.com/qiuhanzhang616-arch/deepseek-v4.1-flash-modelarts.git modelarts-guide
 cd modelarts-guide
-# 如使用本次独立分支，按发布页面显示的分支名 checkout；正式合并后可用 main。
+git checkout docs/w4a8-modelarts-standard-20260929
+# 只有这套 W4A8 包合并到 main 后，才可省略上一行。
 
 git clone https://github.com/chiro2001/deepseek-v4.1-flash-ascend910B.git publisher-a2
 git -C publisher-a2 checkout 7e902a1ab49ee299d37bd38c8cde3f680ce4dc7f
@@ -63,13 +64,17 @@ python w4a8/tools/download_weights.py --local-dir "$W4A8_ROOT/weights" --workers
 发布包把两个巨大 Engram tensor 各拆成 6 片。先把本包的安全重组脚本放到 **权重目录自身**；它严格按 `00`–`05` 的分片名检查 SHA、验证重组结果，并且保留分片。不要从本仓 `tools/` 直接运行（脚本以自身目录为工作目录）：
 
 ```bash
+if [[ -f "$W4A8_ROOT/weights/engram_int8/reassemble_engram_weights.sh" ]]; then
+  cp -n "$W4A8_ROOT/weights/engram_int8/reassemble_engram_weights.sh" \
+    "$W4A8_ROOT/weights/engram_int8/reassemble_engram_weights.publisher-original.sh"
+fi
 install -m 0755 w4a8/tools/reassemble_engram_weights.sh \
   "$W4A8_ROOT/weights/engram_int8/reassemble_engram_weights.sh"
 bash "$W4A8_ROOT/weights/engram_int8/reassemble_engram_weights.sh"
 python w4a8/tools/verify_weights.py "$W4A8_ROOT/weights" --full-hash
 ```
 
-期望至少：主权重 72 片、MTPQ 4 片、索引及 `config.json`/tokenizer/量化描述齐全、无 `.incomplete` 文件、两张 Engram weight 与两张 scale 均符合 `PARTS.sha256`。完整 SHA256 会读取数百 GB，**只在准备阶段做一次**并保存日志；Pod 启动时的默认 `ENGRAM_VERIFY=size` 只核大小，不能冒称每个 Pod 重算了 SHA。不要在无备份时使用重组脚本的 `--delete-parts` 选项。
+期望至少：主权重 72 片、MTPQ 4 片、索引及 `config.json`/tokenizer/量化描述齐全、无 `.incomplete` 文件、两张 Engram weight 与两张 scale 均符合 `PARTS.sha256`。完整 SHA256 会读取数百 GB，**只在准备阶段做一次**并保存日志；Pod 启动时的默认 `ENGRAM_VERIFY=size` 只核大小，不能冒称每个 Pod 重算了 SHA。本包重组脚本不提供 `--delete-parts`，成功后仍保留原始分片。
 
 ## 3. 构建 ARM64 W4A8 镜像并推送私有 SWR
 
