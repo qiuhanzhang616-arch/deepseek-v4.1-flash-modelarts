@@ -19,9 +19,14 @@ so `/model/w4a8/model-view/config.json` and this script directory both exist.
 The model-view must be `W4A8_DYNAMIC`, including tokenizer, quant metadata and
 the preassembled INT8 Engram tensors. Do not use the W8A8 checkpoint.
 
-Each Pod discovers the four Pod IPs from `GLOBAL_RANK_TABLE_FILE_PATH` and its
-own `POD_IP`. It fails closed if the table is incomplete or contains anything
-other than two prefill plus two decode Pods. **Never reuse the old B0 Pod IPs.**
+Each Pod discovers its role-local two-Pod order from
+`GLOBAL_RANK_TABLE_FILE_PATH` and its own `POD_IP`. ModelArts can issue separate
+ranktables per unit, so the two units exchange their four role/IP records
+through the writable results SFS under `pd-2p2d-state/<PD_RENDEZVOUS_ID>`.
+The epoch is pinned per deployment attempt; never reuse it for a new attempt.
+Discovery logs begin before rendezvous and are persisted under
+`/model/w4a8-results/pd-2p2d-logs`. It fails closed unless both roles expose
+exactly two current Pods. **Never reuse the old B0 Pod IPs.**
 All four Pods run an engine on HTTP 8000 plus the PD proxy on HTTP 9000. Use
 `/healthcheck` on port 9000 for the ModelArts health check. ModelArts service
 protocol must match the proxy's HTTP protocol; terminate HTTPS at the platform

@@ -6,6 +6,14 @@ role="${1:-}"
 [[ "$role" == prefill || "$role" == decode ]] || { echo 'usage: pd_entrypoint.sh prefill|decode' >&2; exit 2; }
 export POD_IP="${POD_IP:-$(hostname -I | awk '{print $1}')}"
 [[ -n "$POD_IP" ]] || { echo '[pd] POD_IP unavailable' >&2; exit 2; }
+export PD_RENDEZVOUS_ID="${PD_RENDEZVOUS_ID:-w4a8-pd-2p2d-20260929-v2}"
+log_dir="${PD_LOG_DIR:-/model/w4a8-results/pd-2p2d-logs}"
+mkdir -p "$log_dir"
+log_file="$log_dir/${role}-${POD_IP//./_}-$(date -u +%Y%m%dT%H%M%SZ).log"
+exec > >(tee -a "$log_file") 2>&1
+printf '[pd] discovery start pod=%s role=%s epoch=%s ranktable=%s log=%s\n' \
+  "$POD_IP" "$role" "$PD_RENDEZVOUS_ID" \
+  "${GLOBAL_RANK_TABLE_FILE_PATH:-/user/global/config/global_rank_table.json}" "$log_file"
 rank_output="$(python3 "$SCRIPT_DIR/pd_ranktable.py" --role "$role" --local-ip "$POD_IP")" || exit 2
 mapfile -t peer <<<"$rank_output"
 [[ "${#peer[@]}" -eq 7 ]] || { echo '[pd] incomplete ranktable discovery' >&2; exit 2; }
@@ -22,10 +30,6 @@ if [[ "${PD_VALIDATE_ONLY:-0}" == 1 ]]; then
   printf '[pd] proxy peers P=%s,%s D=%s,%s\n' "$p0" "$p1" "$d0" "$d1"
   exit 0
 fi
-log_dir="${PD_LOG_DIR:-/model/w4a8-results/pd-2p2d-logs}"
-mkdir -p "$log_dir"
-log_file="$log_dir/${role}-${rank}-${POD_IP//./_}-$(date -u +%Y%m%dT%H%M%SZ).log"
-exec > >(tee -a "$log_file") 2>&1
 printf '[pd] pod=%s role=%s rank=%s log=%s\n' "$POD_IP" "$role" "$rank" "$log_file"
 
 pd_serve "$role" "$rank" "$local_ip" "$master_ip" &

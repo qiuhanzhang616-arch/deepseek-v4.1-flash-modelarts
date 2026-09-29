@@ -1,6 +1,9 @@
 import unittest
+import tempfile
+import time
+from pathlib import Path
 
-from pd_ranktable import discover
+from pd_ranktable import collect, discover, local_unit, rendezvous
 
 
 class DiscoveryTests(unittest.TestCase):
@@ -36,6 +39,28 @@ class DiscoveryTests(unittest.TestCase):
             {"pod_name": "svc-role-0-z", "server_ip": "172.16.0.99"})
         with self.assertRaises(ValueError):
             discover(self.table, "172.16.0.11", "prefill")
+
+    def test_two_unit_ranktables_meet_on_shared_sfs(self):
+        p_doc = {"server_group_list": [self.table["server_group_list"][0]]}
+        d_doc = {"server_group_list": [self.table["server_group_list"][1]]}
+        now = time.time()
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp)
+            for role, rank, ip, doc in (
+                ("prefill", 0, "172.16.0.12", p_doc),
+                ("prefill", 1, "172.16.0.11", p_doc),
+                ("decode", 0, "172.16.0.22", d_doc),
+            ):
+                self.assertEqual(local_unit(doc, ip, role)[0], rank)
+                with self.assertRaises(ValueError):
+                    rendezvous(collect(doc), role, rank, ip, directory, "test-v2", now)
+            output = rendezvous(collect(d_doc), "decode", 1, "172.16.0.21",
+                                directory, "test-v2", now)
+            self.assertEqual(output, ["172.16.0.21", "172.16.0.22", "1",
+                                      "172.16.0.12", "172.16.0.11",
+                                      "172.16.0.22", "172.16.0.21"])
+            self.assertEqual(rendezvous(collect(p_doc), "prefill", 0,
+                                        "172.16.0.12", directory, "test-v2", now)[2], "0")
 
 
 if __name__ == "__main__":
