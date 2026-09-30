@@ -33,7 +33,10 @@ PY
   export HCCL_CONNECT_TIMEOUT="${PD_HCCL_CONNECT_TIMEOUT:-1200}" HCCL_EXEC_TIMEOUT=600
   export HCCL_OP_EXPANSION_MODE=AIV
   export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
-  export OMP_PROC_BIND=false OMP_NUM_THREADS="${PD_OMP_NUM_THREADS:-10}"
+  # The pinned ModelArts A2 image denies clone3 with EPERM. Keep the BLAS
+  # import single-threaded, as in the validated C5 W4A8 launch path.
+  export OMP_PROC_BIND=false OMP_NUM_THREADS="${PD_OMP_NUM_THREADS:-1}"
+  export OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
   export TASK_QUEUE_ENABLE=1 USE_MULTI_GROUPS_KV_CACHE=1
   export VLLM_RPC_TIMEOUT=3600000 VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
   export V41_ENGRAM_HOST_RESIDENT=1 V41_ENGRAM_DEVICE_INDEX=0
@@ -92,5 +95,6 @@ PY
     return 0
   fi
   command -v vllm >/dev/null || { pd_die 'vllm CLI missing in image'; return 1; }
+  [[ "${PD_CLONE3_COMPAT_READY:-0}" == 1 ]] || { pd_die 'launch via pd_entrypoint.sh to install clone3 compatibility'; return 1; }
   exec "${cmd[@]}"
 }

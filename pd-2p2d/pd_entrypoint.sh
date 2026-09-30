@@ -6,11 +6,16 @@ role="${1:-}"
 [[ "$role" == prefill || "$role" == decode ]] || { echo 'usage: pd_entrypoint.sh prefill|decode' >&2; exit 2; }
 export POD_IP="${POD_IP:-$(hostname -I | awk '{print $1}')}"
 [[ -n "$POD_IP" ]] || { echo '[pd] POD_IP unavailable' >&2; exit 2; }
-export PD_RENDEZVOUS_ID="${PD_RENDEZVOUS_ID:-w4a8-pd-2p2d-20260929-v2}"
+export PD_RENDEZVOUS_ID="${PD_RENDEZVOUS_ID:-w4a8-pd-2p2d-20260929-v3}"
 log_dir="${PD_LOG_DIR:-/model/w4a8-results/pd-2p2d-logs}"
 mkdir -p "$log_dir"
 log_file="$log_dir/${role}-${POD_IP//./_}-$(date -u +%Y%m%dT%H%M%SZ).log"
 exec > >(tee -a "$log_file") 2>&1
+# Install compatibility before discovery, engine and proxy children are created.
+# The marker is set only by the launcher after syscall and thread probes pass.
+if [[ "${PD_CLONE3_COMPAT_READY:-0}" != 1 ]]; then
+  exec python3 -u "$SCRIPT_DIR/pd_clone3_compat.py" bash "$SCRIPT_DIR/pd_entrypoint.sh" "$role"
+fi
 printf '[pd] discovery start pod=%s role=%s epoch=%s ranktable=%s log=%s\n' \
   "$POD_IP" "$role" "$PD_RENDEZVOUS_ID" \
   "${GLOBAL_RANK_TABLE_FILE_PATH:-/user/global/config/global_rank_table.json}" "$log_file"
