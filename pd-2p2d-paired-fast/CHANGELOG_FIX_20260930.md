@@ -20,7 +20,9 @@ Failure remains closed with descriptive counts and preserves logs.
 
 Compatibility shim retained; logging installed once across re-exec to avoid
 duplicate tee output. Existing inference parameters retained: Prefill32768/32,
-Decode512/32, ctx1048576, TP8/EP, P eager/D graph, INT8 host Engram.
+Decode512/32, ctx1048576, TP8/EP, INT8 host Engram. The actual SFS snapshot
+already defaults both main engines to FULL_DECODE_ONLY (P supports an eager
+override); this setting was preserved. Draft eager is identical on both roles.
 This does not remove model weight loading or compile cost; no loading-speed
 claim before runtime timing evidence. New SFS path:
 /model/w4a8/pd-paired-fast-20260930-r1/pd_entrypoint.sh prefill|decode
